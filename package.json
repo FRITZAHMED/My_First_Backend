@@ -1,0 +1,22 @@
+{
+  "name": "rhopen-park",
+  "version": "1.0.0",
+  "description": "Gestions des equipements informatique d'une Entreprise",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "Server.ts",
+  "scripts": {
+    "test": "Mon Serveur est fonctionnel",
+    "db:pull":"prisma db pull"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.10.0",
+    "dotenv": "^18.0.1",
+    "prisma": "^7.10.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2"
+  }
+}
