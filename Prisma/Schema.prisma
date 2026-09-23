@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model breakdown {
+  idBreakdown Int     @id @default(autoincrement()) @db.UnsignedInt
+  label       String  @db.VarChar(100)
+  description String? @db.Text
+  user        user[]
+}
+
+model equipment {
+  idEquipment  Int     @id @default(autoincrement()) @db.UnsignedInt
+  description  String? @db.VarChar(255)
+  serialNumber String? @unique(map: "serialNumber") @db.VarChar(100)
+  user         user[]
+}
+
+model logisticservice {
+  idLogisticService Int     @id @default(autoincrement()) @db.UnsignedInt
+  idRequest         Int     @db.UnsignedInt
+  professionalEmail String  @db.VarChar(150)
+  password          String  @db.VarChar(255)
+  request           request @relation(fields: [idRequest], references: [idRequest], onDelete: Cascade, onUpdate: Restrict, map: "FK_ServiceLog_Demande")
+
+  @@index([idRequest], map: "FK_ServiceLog_Demande")
+}
+
+model request {
+  idRequest       Int               @id @default(autoincrement()) @db.UnsignedInt
+  description     String?           @db.Text
+  creationDate    DateTime?         @default(now()) @db.DateTime(0)
+  logisticservice logisticservice[]
+  submission      submission[]
+  user            user[]
+}
+
+model submission {
+  idUser    Int     @db.UnsignedInt
+  idRequest Int     @db.UnsignedInt
+  request   request @relation(fields: [idRequest], references: [idRequest], onDelete: Cascade, onUpdate: Restrict, map: "FK_Soumettre_Demande")
+  user      user    @relation(fields: [idUser], references: [idUser], onDelete: Cascade, onUpdate: Restrict, map: "FK_Soumettre_User")
+
+  @@id([idUser, idRequest])
+  @@index([idRequest], map: "FK_Soumettre_Demande")
+}
+
+model user {
+  idUser            Int          @id @default(autoincrement()) @db.UnsignedInt
+  idRequest         Int?         @db.UnsignedInt
+  idEquipment       Int?         @db.UnsignedInt
+  idBreakdown       Int?         @db.UnsignedInt
+  professionalEmail String       @unique(map: "professionalEmail") @db.VarChar(150)
+  password          String       @db.VarChar(255)
+  role              user_role
+  submission        submission[]
+  request           request?     @relation(fields: [idRequest], references: [idRequest], onDelete: Restrict, onUpdate: Restrict, map: "FK_User_Demande")
+  equipment         equipment?   @relation(fields: [idEquipment], references: [idEquipment], onDelete: Restrict, onUpdate: Restrict, map: "FK_User_Equipement")
+  breakdown         breakdown?   @relation(fields: [idBreakdown], references: [idBreakdown], onDelete: Restrict, onUpdate: Restrict, map: "FK_User_Panne")
+
+  @@index([idRequest], map: "FK_User_Demande")
+  @@index([idEquipment], map: "FK_User_Equipement")
+  @@index([idBreakdown], map: "FK_User_Panne")
+}
+
+enum user_role {
+  Employer
+  Manager
+  Administrator
+  Director
+  Logistician
+}
