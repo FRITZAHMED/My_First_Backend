@@ -1,4 +1,5 @@
-import prisma from '../config/Database.js';
+import { prisma } from "../Config/Database.js";
+
 
 export type UserCreateInput = {
 	idRequest?: number;

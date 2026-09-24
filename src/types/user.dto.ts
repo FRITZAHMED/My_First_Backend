@@ -3,10 +3,7 @@ import { user_role, user } from '@prisma/client';
 export interface UserResponseDTO {
   id: number;
   email: string;
-  name: string;
   role: user_role;
-  createdAt: Date;
-  updatedAt: Date;
 }
  
 export interface AuthTokensDTO {
