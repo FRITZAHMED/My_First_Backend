@@ -18,13 +18,6 @@ const password = z
  * de repeter l'enveloppe a chaque fois et garantit que les controleurs ne
  recoivent que des donnees typees.
  */
-const envelope = <T extends z.ZodRawShape>(shape: T) =>
-	z.object({
-		body: z.object(shape).optional(),
-		query: z.object({}).passthrough().optional(),
-		params: z.object({}).passthrough().optional(),
-	});
-
 const paramsOnly = <T extends z.ZodRawShape>(shape: T) =>
 	z.object({
 		body: z.object({}).passthrough().optional(),
@@ -47,4 +40,4 @@ export const idRequestAndUserParams = paramsOnly({
 	idUser: z.coerce.number().int().positive('Identifiant utilisateur invalide'),
 });
 
-export { envelope, paramsOnly, password as passwordSchema, trimmedEmail };
+export { paramsOnly, password as passwordSchema, trimmedEmail };

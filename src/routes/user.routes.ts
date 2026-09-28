@@ -28,8 +28,8 @@ const ADMIN = ['Administrator', 'Director'] as const;
  *       201: { description: Utilisateur cree }
  *       409: { description: Email deja utilise }
  */
-router.get('/', validate(listUsersSchema), UserController.getAll);
-router.post('/', validate(createUserSchema), UserController.create);
+router.get('/', authenticate, requireRole(...ADMIN), validate(listUsersSchema), UserController.getAll);
+router.post('/', authenticate, requireRole(...ADMIN), validate(createUserSchema), UserController.create);
 
 /**
  * @openapi
@@ -43,8 +43,8 @@ router.post('/', validate(createUserSchema), UserController.create);
  *       200: { description: Utilisateur }
  *       404: { description: Introuvable }
  */
-router.get('/:id', validate(idParams), UserController.getById);
-router.patch('/:id', validate(idParams), validate(updateUserSchema), UserController.update);
-router.delete('/:id', validate(idParams), UserController.delete);
+router.get('/:id', authenticate, validate(idParams), UserController.getById);
+router.patch('/:id', authenticate, requireRole(...ADMIN), validate(idParams), validate(updateUserSchema), UserController.update);
+router.delete('/:id', authenticate, requireRole('Administrator'), validate(idParams), UserController.delete);
 
 export default router;
