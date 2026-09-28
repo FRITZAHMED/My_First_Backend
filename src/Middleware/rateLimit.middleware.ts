@@ -1,14 +1,16 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import type { Request, Response } from 'express';
 import { env } from '../Config/env.js';
 
 /**
  * On identifie le client par son email une fois authentifie, et par son IP
- * sinon. Derriere un reverse proxy, `trust proxy` est active dans server.ts,
+ * sinon. `ipKeyGenerator` est indispensable : sans lui, un client IPv6
+ * pourrait contourner la limite en changeant d'adresse.
+ * Derriere un reverse proxy, `trust proxy` est active dans server.ts,
  * ce qui rend `req.ip` fiable.
  */
 function keyGenerator(req: Request): string {
-	return req.auth?.email ?? req.ip ?? 'unknown';
+	return req.auth?.email ?? ipKeyGenerator(req.ip ?? '');
 }
 
 const shared = {

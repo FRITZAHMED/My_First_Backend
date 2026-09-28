@@ -54,7 +54,11 @@ for (const name of folders) {
 		for (const statement of statements) {
 			await prisma.$executeRawUnsafe(statement);
 		}
-		await prisma.$executeRawUnsafe('UPDATE `_prisma_migrations` SET finished_at = ? WHERE id = ?', new Date(), id);
+		await prisma.$executeRawUnsafe(
+			'UPDATE `_prisma_migrations` SET finished_at = ? WHERE id = ?',
+			new Date(),
+			id,
+		);
 	} catch (error) {
 		await prisma.$executeRawUnsafe(
 			'UPDATE `_prisma_migrations` SET rolled_back_at = ?, logs = ? WHERE id = ?',

@@ -33,13 +33,21 @@ async function main() {
 	const laptop = await prisma.equipment.upsert({
 		where: { serialNumber: 'RH-LAPTOP-0001' },
 		update: {},
-		create: { serialNumber: 'RH-LAPTOP-0001', description: 'Ordinateur portable Lenovo T14', status: 'AVAILABLE' },
+		create: {
+			serialNumber: 'RH-LAPTOP-0001',
+			description: 'Ordinateur portable Lenovo T14',
+			status: 'AVAILABLE',
+		},
 	});
 
 	await prisma.equipment.upsert({
 		where: { serialNumber: 'RH-DESKTOP-0001' },
 		update: {},
-		create: { serialNumber: 'RH-DESKTOP-0001', description: 'Poste fixe HP EliteDesk', status: 'AVAILABLE' },
+		create: {
+			serialNumber: 'RH-DESKTOP-0001',
+			description: 'Poste fixe HP EliteDesk',
+			status: 'AVAILABLE',
+		},
 	});
 
 	await prisma.breakdown.create({
@@ -51,6 +59,7 @@ async function main() {
 	});
 
 	const employe = await prisma.user.findUnique({ where: { professionalEmail: 'employe@rhopenlabs.com' } });
+
 	if (employe) {
 		await prisma.request.create({
 			data: {

@@ -1,40 +1,24 @@
 import { z } from 'zod';
-import { passwordSchema, trimmedEmail } from './common.js';
+import { envelope, passwordSchema, trimmedEmail } from './common.js';
 
-export const registerSchema = z.object({
-	body: z.object({
-		professionalEmail: trimmedEmail,
-		password: passwordSchema,
-		role: z.enum(['Administrator', 'Director', 'Manager', 'Logistician', 'Employer']).default('Employer'),
-	}),
-	query: z.object({}).optional(),
-	params: z.object({}).optional(),
+export const registerSchema = envelope({
+	professionalEmail: trimmedEmail,
+	password: passwordSchema,
+	role: z.enum(['Administrator', 'Director', 'Manager', 'Logistician', 'Employer']).default('Employer'),
 });
 
-export const loginSchema = z.object({
-	body: z.object({
-		professionalEmail: trimmedEmail,
-		password: z.string().min(1, 'Mot de passe obligatoire').max(72),
-	}),
-	query: z.object({}).optional(),
-	params: z.object({}).optional(),
+export const loginSchema = envelope({
+	professionalEmail: trimmedEmail,
+	password: z.string().min(1, 'Mot de passe obligatoire').max(72),
 });
 
-export const refreshSchema = z.object({
-	body: z.object({
-		refreshToken: z.string().min(20, 'Refresh token invalide'),
-	}),
-	query: z.object({}).optional(),
-	params: z.object({}).optional(),
+export const refreshSchema = envelope({
+	refreshToken: z.string().min(20, 'Refresh token invalide'),
 });
 
-export const changePasswordSchema = z.object({
-	body: z.object({
-		currentPassword: z.string().min(1, 'Mot de passe actuel obligatoire'),
-		newPassword: passwordSchema,
-	}),
-	query: z.object({}).optional(),
-	params: z.object({}).optional(),
+export const changePasswordSchema = envelope({
+	currentPassword: z.string().min(1, 'Mot de passe actuel obligatoire'),
+	newPassword: passwordSchema,
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>['body'];

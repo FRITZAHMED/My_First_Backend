@@ -13,16 +13,33 @@ const password = z
 	.max(72, 'Le mot de passe doit faire au plus 72 caracteres (limite bcrypt)');
 
 /**
- * Le middleware `validate` attend un schema decrivant `{ body, query, params }`.
- * Ces helpers construisent donc des schemas de requete complets, ce qui evite
- * de repeter l'enveloppe a chaque fois et garantit que les controleurs ne
- recoivent que des donnees typees.
+ * Le middleware `validate` attend un schema decrivant `{ body, query, params }`
+ * et remplace chaque partie par sa version typee.
+ *
+* Les parties que le schema ne valide pas doivent imperativement etre en
+ * `.passthrough()` : une route peut enchainer deux validations (params puis
+ * body). Avec un `z.object({})` strict, la seconde passe effacerait les
+ * params deja valides par la premiere.
  */
-const paramsOnly = <T extends z.ZodRawShape>(shape: T) =>
+export const envelope = <T extends z.ZodRawShape>(shape: T) =>
+	z.object({
+		body: z.object(shape),
+		query: z.object({}).passthrough().optional(),
+		params: z.object({}).passthrough().optional(),
+	});
+
+export const paramsOnly = <T extends z.ZodRawShape>(shape: T) =>
 	z.object({
 		body: z.object({}).passthrough().optional(),
 		query: z.object({}).passthrough().optional(),
 		params: z.object(shape),
+	});
+
+export const queryOnly = <T extends z.ZodRawShape>(shape: T) =>
+	z.object({
+		body: z.object({}).passthrough().optional(),
+		query: z.object(shape),
+		params: z.object({}).passthrough().optional(),
 	});
 
 export const idParams = paramsOnly({ id: z.coerce.number().int().positive('Identifiant invalide') });
@@ -40,4 +57,9 @@ export const idRequestAndUserParams = paramsOnly({
 	idUser: z.coerce.number().int().positive('Identifiant utilisateur invalide'),
 });
 
-export { paramsOnly, password as passwordSchema, trimmedEmail };
+const pageQuery = {
+	page: z.coerce.number().int().min(1).default(1),
+	limit: z.coerce.number().int().min(1).max(100).default(20),
+};
+
+export { pageQuery, password as passwordSchema, trimmedEmail };
