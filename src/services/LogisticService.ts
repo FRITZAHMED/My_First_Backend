@@ -1,60 +1,59 @@
-import { AppError } from '../Utils/AppError.js';
-import { hashPassword } from '../Utils/password.js';
-import LogisticServiceRepository, {
-	type LogisticServiceCreateInput,
-	type LogisticServiceUpdateInput,
-} from '../repositories/LogisticServiceRepository.js';
+import { ConflictError, ForbiddenError, NotFoundError } from '../Utils/AppError.js';
+import type { CreateAssignmentInput, ListAssignmentQuery } from '../Validators/logisticService.validator.js';
+import { buildMeta, toSkipTake } from '../Utils/pagination.js';
+import LogisticServiceRepository from '../repositories/LogisticServiceRepository.js';
 import RequestRepository from '../repositories/RequestRepository.js';
+import UserRepository from '../repositories/UserRepository.js';
 
 class LogisticService {
-	async createLogisticService(serviceData: LogisticServiceCreateInput) {
-		const request = await RequestRepository.findById(serviceData.idRequest);
+	async createAssignment(data: CreateAssignmentInput) {
+		const [request, logistician] = await Promise.all([
+			RequestRepository.findById(data.idRequest),
+			UserRepository.findById(data.idLogistician),
+		]);
 
 		if (!request) {
-			throw new AppError('Demande introuvable', 404);
+			throw new NotFoundError('Demande');
 		}
 
-		return LogisticServiceRepository.create({
-			...serviceData,
-			password: await hashPassword(serviceData.password),
-		});
-	}
-
-	async getLogisticServiceById(idLogisticService: number) {
-		const service = await LogisticServiceRepository.findById(idLogisticService);
-
-		if (!service) {
-			throw new AppError('Service logistique introuvable', 404);
+		if (!logistician) {
+			throw new NotFoundError('Utilisateur');
 		}
 
-		return service;
-	}
-
-	async getAllLogisticServices() {
-		return LogisticServiceRepository.findAll();
-	}
-
-	async updateLogisticService(idLogisticService: number, serviceData: LogisticServiceUpdateInput) {
-		await this.getLogisticServiceById(idLogisticService);
-
-		if (serviceData.idRequest !== undefined) {
-			const request = await RequestRepository.findById(serviceData.idRequest);
-
-			if (!request) {
-				throw new AppError('Demande introuvable', 404);
-			}
+		if (logistician.role !== 'Logistician' && logistician.role !== 'Administrator') {
+			throw new ForbiddenError('Seul un logisticien peut etre affecte a une demande');
 		}
 
-		const updateData = { ...serviceData };
-		if (updateData.password) {
-			updateData.password = await hashPassword(updateData.password);
+		if (await LogisticServiceRepository.findByPair(data.idRequest, data.idLogistician)) {
+			throw new ConflictError('Ce logisticien est deja affecte a cette demande');
 		}
 
-		return LogisticServiceRepository.update(idLogisticService, updateData);
+		return LogisticServiceRepository.create(data);
 	}
 
-	async deleteLogisticService(idLogisticService: number) {
-		await this.getLogisticServiceById(idLogisticService);
+	async getAssignmentById(idLogisticService: number) {
+		const assignment = await LogisticServiceRepository.findById(idLogisticService);
+
+		if (!assignment) {
+			throw new NotFoundError('Affectation');
+		}
+
+		return assignment;
+	}
+
+	async listAssignments(query: ListAssignmentQuery) {
+		const { skip, take } = toSkipTake(query);
+
+		const [assignments, total] = await Promise.all([
+			LogisticServiceRepository.findMany(skip, take),
+			LogisticServiceRepository.count(),
+		]);
+
+		return { assignments, meta: buildMeta(query, total) };
+	}
+
+	async deleteAssignment(idLogisticService: number) {
+		await this.getAssignmentById(idLogisticService);
 		return LogisticServiceRepository.delete(idLogisticService);
 	}
 }

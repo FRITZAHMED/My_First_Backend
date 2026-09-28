@@ -28,8 +28,21 @@ class RequestRepository {
 		});
 	}
 
+	findMany(skip: number, take: number) {
+		return prisma.request.findMany({
+			select: publicFields,
+			orderBy: { creationDate: 'desc' },
+			skip,
+			take,
+		});
+	}
+
 	countByAuthor(idUser: number) {
 		return prisma.request.count({ where: { idUser } });
+	}
+
+	count() {
+		return prisma.request.count();
 	}
 
 	update(idRequest: number, data: Prisma.requestUpdateInput) {

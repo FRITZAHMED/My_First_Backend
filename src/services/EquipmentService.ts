@@ -1,51 +1,62 @@
-import equipmentRepository from '../repositories/EquipmentRepository.js';
-
-type EquipmentInput = {
-    description: string ;
-    serialNumber: string ;
-};
-
-type EquipmentUpdateInput = Partial<EquipmentInput>;
+import { NotFoundError } from '../Utils/AppError.js';
+import type { CreateEquipmentInput, ListEquipmentQuery, UpdateEquipmentInput } from '../Validators/equipment.validator.js';
+import { buildMeta, toSkipTake } from '../Utils/pagination.js';
+import EquipmentRepository from '../repositories/EquipmentRepository.js';
+import UserRepository from '../repositories/UserRepository.js';
 
 class EquipmentService {
+	async createEquipment(data: CreateEquipmentInput) {
+		if (data.idUser) {
+			await this.assertUserExists(data.idUser);
+		}
 
-    async createEquipment(equipmentData: EquipmentInput) {
-        return equipmentRepository.create(equipmentData);
-    }
+		return EquipmentRepository.create(data);
+	}
 
-    async getEquipmentById(idEquipment: number) {
-        const equipment = await equipmentRepository.findById(idEquipment);
+	async getEquipmentById(idEquipment: number) {
+		const equipment = await EquipmentRepository.findById(idEquipment);
 
-        if (!equipment) {
-            throw new Error("Équipement introuvable");
-        }
+		if (!equipment) {
+			throw new NotFoundError('Equipement');
+		}
 
-        return equipment;
-    }
+		return equipment;
+	}
 
-    async getAllEquipment() {
-        return equipmentRepository.findAll();
-    }
+	async listEquipment(query: ListEquipmentQuery) {
+		const { skip, take } = toSkipTake(query);
+		const filters = { status: query.status };
 
-    async updateEquipment(idEquipment: number, equipmentData: EquipmentUpdateInput) {
-        const equipment = await equipmentRepository.findById(idEquipment);
+		const [equipment, total] = await Promise.all([
+			EquipmentRepository.findMany(skip, take, filters),
+			EquipmentRepository.count(filters),
+		]);
 
-        if (!equipment) {
-            throw new Error("Équipement introuvable");
-        }
+		return { equipment, meta: buildMeta(query, total) };
+	}
 
-        return equipmentRepository.update(idEquipment, equipmentData);
-    }
+	async updateEquipment(idEquipment: number, data: UpdateEquipmentInput) {
+		await this.getEquipmentById(idEquipment);
 
-    async deleteEquipment(idEquipment: number) {
-        const equipment = await equipmentRepository.findById(idEquipment);
+		if (data.idUser) {
+			await this.assertUserExists(data.idUser);
+		}
 
-        if (!equipment) {
-            throw new Error("Équipement introuvable");
-        }
+		return EquipmentRepository.update(idEquipment, data);
+	}
 
-        return equipmentRepository.delete(idEquipment);
-    }
+	async deleteEquipment(idEquipment: number) {
+		await this.getEquipmentById(idEquipment);
+		return EquipmentRepository.delete(idEquipment);
+	}
+
+	private async assertUserExists(idUser: number) {
+		const user = await UserRepository.findById(idUser);
+
+		if (!user) {
+			throw new NotFoundError('Utilisateur');
+		}
+	}
 }
 
 export default new EquipmentService();

@@ -1,4 +1,5 @@
 import type { user_role } from '@prisma/client';
+import { env } from '../Config/env.js';
 import { ConflictError, ForbiddenError, NotFoundError, UnauthorizedError } from '../Utils/AppError.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../Utils/jwt.js';
 import { comparePassword, createTokenId, hashPassword, hashToken } from '../Utils/password.js';
@@ -111,7 +112,7 @@ class AuthService {
 			accessToken: signAccessToken({ id: idUser, email, role }),
 			refreshToken,
 			tokenType: 'Bearer' as const,
-			expiresIn: process.env.JWT_ACCESS_EXPIRES_IN ?? '15m',
+			expiresIn: env.JWT_ACCESS_EXPIRES_IN,
 		};
 	}
 }

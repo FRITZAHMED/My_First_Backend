@@ -12,30 +12,39 @@ const password = z
 	.min(8, 'Le mot de passe doit faire au moins 8 caracteres')
 	.max(72, 'Le mot de passe doit faire au plus 72 caracteres (limite bcrypt)');
 
-const idParams = z.object({
-	id: z.coerce.number().int().positive('Identifiant invalide'),
-});
+/**
+ * Le middleware `validate` attend un schema decrivant `{ body, query, params }`.
+ * Ces helpers construisent donc des schemas de requete complets, ce qui evite
+ * de repeter l'enveloppe a chaque fois et garantit que les controleurs ne
+ recoivent que des donnees typees.
+ */
+const envelope = <T extends z.ZodRawShape>(shape: T) =>
+	z.object({
+		body: z.object(shape).optional(),
+		query: z.object({}).passthrough().optional(),
+		params: z.object({}).passthrough().optional(),
+	});
 
-const idUserParams = z.object({
-	idUser: z.coerce.number().int().positive('Identifiant utilisateur invalide'),
-});
+const paramsOnly = <T extends z.ZodRawShape>(shape: T) =>
+	z.object({
+		body: z.object({}).passthrough().optional(),
+		query: z.object({}).passthrough().optional(),
+		params: z.object(shape),
+	});
 
-const idRequestParams = z.object({
+export const idParams = paramsOnly({ id: z.coerce.number().int().positive('Identifiant invalide') });
+
+export const idRequestParams = paramsOnly({
 	idRequest: z.coerce.number().int().positive('Identifiant de demande invalide'),
 });
 
-const idRequestAndUserParams = idRequestParams.merge(idUserParams);
-
-const idLogisticServiceParams = z.object({
-	idLogisticService: z.coerce.number().int().positive('Identifiant de service logistique invalide'),
+export const idLogisticServiceParams = paramsOnly({
+	idLogisticService: z.coerce.number().int().positive("Identifiant d'affectation invalide"),
 });
 
-export {
-	idParams,
-	idUserParams,
-	idRequestParams,
-	idRequestAndUserParams,
-	idLogisticServiceParams,
-	password as passwordSchema,
-	trimmedEmail,
-};
+export const idRequestAndUserParams = paramsOnly({
+	idRequest: z.coerce.number().int().positive('Identifiant de demande invalide'),
+	idUser: z.coerce.number().int().positive('Identifiant utilisateur invalide'),
+});
+
+export { envelope, paramsOnly, password as passwordSchema, trimmedEmail };

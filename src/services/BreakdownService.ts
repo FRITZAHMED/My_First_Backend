@@ -1,52 +1,87 @@
-import { breakdown } from "@prisma/client";
-import BreakdownRepository from "../repositories/BreakdownRepository.js";
+import { NotFoundError } from '../Utils/AppError.js';
+import type {
+	CreateBreakdownInput,
+	ListBreakdownQuery,
+	UpdateBreakdownInput,
+} from '../Validators/breakdown.validator.js';
+import { buildMeta, toSkipTake } from '../Utils/pagination.js';
+import BreakdownRepository from '../repositories/BreakdownRepository.js';
+import EquipmentRepository from '../repositories/EquipmentRepository.js';
 
-type BreakdownInput = {
-    label:string,
-    Description:string
-};
-
-type BreakdownUpdateInput = Partial<BreakdownInput>;
+const CLOSED_STATUSES = ['RESOLVED', 'CLOSED'] as const;
 
 class BreakdownService {
+	async createBreakdown(data: CreateBreakdownInput, reporterId: number) {
+		if (data.idEquipment) {
+			await this.assertEquipmentExists(data.idEquipment);
+		}
 
-    async createBreakdown(BreakdownData:BreakdownInput){
-      return BreakdownRepository.create(BreakdownData);
-    }
+		return BreakdownRepository.create({
+			label: data.label,
+			description: data.description ?? null,
+			idEquipment: data.idEquipment ?? null,
+			idUser: reporterId,
+		});
+	}
 
-    async getBreakdownById(idBreakdown:number){
-       const Breakdown = await BreakdownRepository.findById(idBreakdown);
+	async getBreakdownById(idBreakdown: number) {
+		const breakdown = await BreakdownRepository.findById(idBreakdown);
 
-       if(!Breakdown){
-         throw new Error("Panne Detecter");
-       }
+		if (!breakdown) {
+			throw new NotFoundError('Panne');
+		}
 
-       return Breakdown;
-    }
+		return breakdown;
+	}
 
-    async getAllBreakdown(){
-        return BreakdownRepository.findAll();
-    }
+	async listBreakdowns(query: ListBreakdownQuery) {
+		const { skip, take } = toSkipTake(query);
+		const filters = { status: query.status };
 
-    async UpdateBreakdown(idBreakdown:number,BreakdownData:BreakdownUpdateInput){
-        const UpdateBreakdown = await BreakdownRepository.findById(idBreakdown);
+		const [breakdowns, total] = await Promise.all([
+			BreakdownRepository.findMany(skip, take, filters),
+			BreakdownRepository.count(filters),
+		]);
 
-        if(!UpdateBreakdown){
-            throw new Error("Panne introuvable");
-        }
+		return { breakdowns, meta: buildMeta(query, total) };
+	}
 
-        return BreakdownRepository.Update(idBreakdown,BreakdownData);
-    }
+	async updateBreakdown(idBreakdown: number, data: UpdateBreakdownInput) {
+		const breakdown = await this.getBreakdownById(idBreakdown);
 
-    async DeleteBreakdown(idBreakdown:number){
-        const DeleteBreakdown = await BreakdownRepository.Delete(idBreakdown);
+		if (data.idEquipment) {
+			await this.assertEquipmentExists(data.idEquipment);
+		}
 
-        if(!DeleteBreakdown){
-            throw new Error("Panne Introuvable");
-        }
+		const becomesClosed =
+			data.status !== undefined && CLOSED_STATUSES.includes(data.status as (typeof CLOSED_STATUSES)[number]);
 
-        return BreakdownRepository.Delete(idBreakdown);
-    }
+		return BreakdownRepository.update(idBreakdown, {
+			...(data.label !== undefined && { label: data.label }),
+			...(data.description !== undefined && { description: data.description }),
+			...(data.idEquipment !== undefined && { idEquipment: data.idEquipment }),
+			...(data.status !== undefined && { status: data.status }),
+			// resolvedAt est pose automatiquement a la cloture, efface a la reouverture.
+			...(becomesClosed
+				? { resolvedAt: data.resolvedAt ?? new Date() }
+				: data.status !== undefined
+					? { resolvedAt: null }
+					: {}),
+		});
+	}
+
+	async deleteBreakdown(idBreakdown: number) {
+		await this.getBreakdownById(idBreakdown);
+		return BreakdownRepository.delete(idBreakdown);
+	}
+
+	private async assertEquipmentExists(idEquipment: number) {
+		const equipment = await EquipmentRepository.findById(idEquipment);
+
+		if (!equipment) {
+			throw new NotFoundError('Equipement');
+		}
+	}
 }
 
 export default new BreakdownService();
