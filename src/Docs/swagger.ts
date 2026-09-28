@@ -8,7 +8,7 @@ const options = {
 			title: 'RHopenLabs API',
 			version: '1.0.0',
 			description:
-				'API de gestion du parc informatique : equipements, pannes, demandes de service et affectations logistiques.',
+				'Rhopen By Ahmed',
 		},
 		servers: [{ url: `http://localhost:${env.PORT}`, description: 'Developpement' }],
 		components: {

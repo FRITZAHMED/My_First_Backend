@@ -10,7 +10,7 @@ import { env } from './Config/env.js';
 import { logger } from './Config/logger.js';
 import swaggerSpec from './Docs/swagger.js';
 import errorHandler, { notFoundHandler } from './Middleware/error.middleware.js';
-import { apiLimiter } from './Middleware/rateLimit.middleware.js';
+// import { apiLimiter } from './Middleware/rateLimit.middleware.js';
 import routes from './routes/index.js';
 
 export function createApp() {
@@ -42,10 +42,10 @@ export function createApp() {
 	app.use(express.json({ limit: '100kb' }));
 	app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 	app.use(hpp());
-	app.use('/api', apiLimiter);
+	// app.use('/api', apiLimiter);
 
 	app.get('/', (_req, res) => {
-		res.json({ success: true, data: { name: 'RHopenLabs API', docs: '/api-docs' } });
+		res.json( { name: 'RHopenLabs API', docs: '/api-docs Swagger' });
 	});
 
 	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
