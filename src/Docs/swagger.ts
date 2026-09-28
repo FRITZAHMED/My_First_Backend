@@ -38,9 +38,67 @@ const options = {
         User: {
           type: "object",
           properties: {
-            id: { type: "integer", example: 1 },
-            email: { type: "string", format: "email", example: "Ahmed@gmail.com" },
+            id: { type: "integer"},
+            email: { type: "string", format: "email"},
             role: { type: "string", example: "Employer" },
+          },
+        },
+        CreateRequest: {
+          type: "object",
+          properties: {
+            description: { type: "string"},
+            creationDate: { type: "string", format: "date-time"},
+          },
+        },
+        UpdateRequest: {
+          allOf: [{ $ref: "#/components/schemas/CreateRequest" }],
+        },
+        Request: {
+          type: "object",
+          properties: {
+            idRequest: { type: "integer"},
+            description: { type: "string"},
+            creationDate: { type: "string", format: "date-time",},
+          },
+        },
+        CreateLogisticService: {
+          type: "object",
+          required: ["idRequest", "professionalEmail", "password"],
+          properties: {
+            idRequest: { type: "integer"},
+            professionalEmail: { type: "string", format: "email"},
+            password: { type: "string", format: "password"},
+          },
+        },
+        UpdateLogisticService: {
+          type: "object",
+          properties: {
+            idRequest: { type: "integer"},
+            professionalEmail: { type: "string", format: "email" },
+            password: { type: "string", format: "password"},
+          },
+        },
+        LogisticService: {
+          type: "object",
+          properties: {
+            idLogisticService: { type: "integer"},
+            idRequest: { type: "integer"},
+            professionalEmail: { type: "string", format: "email" },
+          },
+        },
+        CreateSubmission: {
+          type: "object",
+          required: ["idUser", "idRequest"],
+          properties: {
+            idUser: { type: "integer"},
+            idRequest: { type: "integer"},
+          },
+        },
+        Submission: {
+          type: "object",
+          properties: {
+            idUser: { type: "integer"},
+            idRequest: { type: "integer"},
           },
         },
       },

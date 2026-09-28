@@ -1,13 +1,10 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './Docs/swagger.js';
-import userRouter from './routes/user_routes.js';
-
+import { json } from 'zod';
 const app = express();
 const port = 4000;
 
-app.use(express.json());
-app.use('/api', userRouter);
 app.get('/', (_req, res) => {
   res.send('Hello World!');
 });
