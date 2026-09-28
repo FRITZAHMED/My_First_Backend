@@ -21,7 +21,12 @@ function sign(payload: object, secret: string, expiresIn: string): string {
 }
 
 export function signAccessToken(input: { id: number; email: string; role: string }): string {
-	const payload: AccessTokenPayload = { ...input, tokenType: 'access' };
+	const payload: Omit<AccessTokenPayload, 'sub'> & { sub: number } = {
+		sub: input.id,
+		email: input.email,
+		role: input.role,
+		tokenType: 'access',
+	};
 	return sign(payload, env.JWT_ACCESS_SECRET, env.JWT_ACCESS_EXPIRES_IN);
 }
 

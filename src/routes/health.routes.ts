@@ -17,14 +17,10 @@ const router = Router();
 router.get(
 	'/',
 	asyncHandler(async (_req, res) => {
-		let database = 'down';
-
-		try {
-			await prisma.$queryRaw`SELECT 1`;
-			database = 'up';
-		} catch {
-			database = 'down';
-		}
+		const database = await prisma
+			.$queryRaw`SELECT 1`
+			.then(() => 'up' as const)
+			.catch(() => 'down' as const);
 
 		res.status(database === 'up' ? 200 : 503).json({
 			success: database === 'up',

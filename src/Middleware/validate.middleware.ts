@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
-import { z } from 'zod';
 import { ZodError } from 'zod';
+import type { ZodTypeAny } from 'zod';
 import { ValidationError } from '../Utils/AppError.js';
 
 type RequestParts = {
@@ -17,7 +17,7 @@ function toFieldErrors(error: ZodError): Array<{ field: string; message: string 
 }
 
 const validate =
-	(schema: z.ZodTypeAny) =>
+	(schema: ZodTypeAny) =>
 	(req: Request, _res: Response, next: NextFunction): void => {
 		try {
 			const parsed = schema.parse({

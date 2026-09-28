@@ -7,6 +7,113 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model user {
+  idUser            Int               @id @default(autoincrement()) @db.UnsignedInt
+  professionalEmail String            @unique(map: "professionalEmail") @db.VarChar(150)
+  password          String            @db.VarChar(255)
+  role              user_role         @default(Employer)
+  createdAt         DateTime          @default(now())
+  isActive          Boolean           @default(true)
+  refreshToken      String?           @db.VarChar(255)
+  updatedAt         DateTime          @updatedAt
+  breakdowns        breakdown[]
+  equipment         equipment[]
+  assignments       logisticservice[]
+  requests          request[]
+  submissions       submission[]
+
+  @@map("user")
+}
+
+model equipment {
+  idEquipment  Int              @id @default(autoincrement()) @db.UnsignedInt
+  description  String?          @db.VarChar(255)
+  serialNumber String?          @unique(map: "serialNumber") @db.VarChar(100)
+  createdAt    DateTime         @default(now())
+  idUser       Int?             @map("idUser") @db.UnsignedInt
+  status       equipment_status @default(AVAILABLE)
+  updatedAt    DateTime         @updatedAt
+  breakdowns   breakdown[]
+  holder       user?            @relation(fields: [idUser], references: [idUser], onUpdate: Restrict, map: "FK_Equipment_User")
+
+  @@index([idUser], map: "FK_Equipment_User")
+  @@index([status], map: "IDX_Equipment_Status")
+  @@map("equipment")
+}
+
+model breakdown {
+  idBreakdown Int              @id @default(autoincrement()) @db.UnsignedInt
+  label       String           @db.VarChar(100)
+  description String?          @db.Text
+  createdAt   DateTime         @default(now())
+  idEquipment Int?             @map("idEquipment") @db.UnsignedInt
+  idUser      Int?             @map("idUser") @db.UnsignedInt
+  resolvedAt  DateTime?
+  status      breakdown_status @default(OPEN)
+  updatedAt   DateTime         @updatedAt
+  equipment   equipment?       @relation(fields: [idEquipment], references: [idEquipment], onUpdate: Restrict, map: "FK_Breakdown_Equipment")
+  reporter    user?            @relation(fields: [idUser], references: [idUser], onUpdate: Restrict, map: "FK_Breakdown_User")
+
+  @@index([idUser], map: "FK_Breakdown_User")
+  @@index([idEquipment], map: "FK_Breakdown_Equipment")
+  @@index([status], map: "IDX_Breakdown_Status")
+  @@map("breakdown")
+}
+
+model request {
+  idRequest    Int               @id @default(autoincrement()) @db.UnsignedInt
+  description  String?           @db.Text
+  creationDate DateTime          @default(now())
+  createdAt    DateTime          @default(now())
+  idUser       Int               @map("idUser") @db.UnsignedInt
+  updatedAt    DateTime          @updatedAt
+  assignments  logisticservice[]
+  author       user              @relation(fields: [idUser], references: [idUser], onDelete: Cascade, onUpdate: Restrict, map: "FK_Request_User")
+  submissions  submission[]
+
+  @@index([idUser], map: "FK_Request_User")
+  @@index([creationDate], map: "IDX_Request_CreationDate")
+  @@map("request")
+}
+
+model logisticservice {
+  idLogisticService Int      @id @default(autoincrement()) @db.UnsignedInt
+  idRequest         Int      @map("idRequest") @db.UnsignedInt
+  createdAt         DateTime @default(now())
+  idLogistician     Int      @map("idLogistician") @db.UnsignedInt
+  logistician       user     @relation(fields: [idLogistician], references: [idUser], onDelete: Cascade, onUpdate: Restrict, map: "FK_Assignment_Logistician")
+  request           request  @relation(fields: [idRequest], references: [idRequest], onDelete: Cascade, onUpdate: Restrict, map: "FK_Assignment_Request")
+
+  @@unique([idRequest, idLogistician], map: "UQ_Assignment_Request_Logistician")
+  @@index([idLogistician], map: "FK_Assignment_Logistician")
+  @@index([idRequest], map: "FK_ServiceLog_Demande")
+  @@map("logisticservice")
+}
+
+model submission {
+  idUser    Int      @map("idUser") @db.UnsignedInt
+  idRequest Int      @map("idRequest") @db.UnsignedInt
+  createdAt DateTime @default(now())
+  request   request  @relation(fields: [idRequest], references: [idRequest], onDelete: Cascade, onUpdate: Restrict, map: "FK_Submission_Request")
+  user      user     @relation(fields: [idUser], references: [idUser], onDelete: Cascade, onUpdate: Restrict, map: "FK_Submission_User")
+
+  @@id([idUser, idRequest])
+  @@index([idRequest], map: "FK_Soumettre_Demande")
+  @@map("submission")
+}
+
+model prisma_migrations {
+  id             String    @id @db.VarChar(36)
+  checksum       String    @db.VarChar(64)
+  finished_at    DateTime?
+  migration_name String    @db.VarChar(255)
+  logs           String?   @db.Text
+  rolled_back_at DateTime?
+  started_at     DateTime  @default(now())
+
+  @@map("_prisma_migrations")
+}
+
 enum user_role {
   Administrator
   Director
@@ -27,105 +134,4 @@ enum breakdown_status {
   IN_PROGRESS
   RESOLVED
   CLOSED
-}
-
-model user {
-  idUser            Int       @id @default(autoincrement()) @db.UnsignedInt
-  professionalEmail String    @unique(map: "professionalEmail") @db.VarChar(150)
-  password          String    @db.VarChar(255)
-  role              user_role @default(Employer)
-  isActive          Boolean   @default(true)
-  refreshToken      String?   @db.VarChar(255)
-  createdAt         DateTime  @default(now()) @db.DateTime(3)
-  updatedAt         DateTime  @updatedAt @db.DateTime(3)
-
-  equipment   equipment[]
-  breakdowns  breakdown[]
-  assignments logisticservice[]
-  requests    request[]
-  submissions submission[]
-
-  @@map("user")
-}
-
-model equipment {
-  idEquipment   Int              @id @default(autoincrement()) @db.UnsignedInt
-  description   String?          @db.VarChar(255)
-  serialNumber  String?          @unique(map: "serialNumber") @db.VarChar(100)
-  status        equipment_status @default(AVAILABLE)
-  idUser        Int?             @map("idUser") @db.UnsignedInt
-  createdAt     DateTime         @default(now()) @db.DateTime(3)
-  updatedAt     DateTime         @updatedAt @db.DateTime(3)
-
-  holder     user?       @relation(fields: [idUser], references: [idUser], onDelete: SetNull, onUpdate: Restrict, map: "FK_Equipment_User")
-  breakdowns breakdown[]
-
-  @@index([idUser], map: "FK_Equipment_User")
-  @@index([status], map: "IDX_Equipment_Status")
-  @@map("equipment")
-}
-
-model breakdown {
-  idBreakdown  Int              @id @default(autoincrement()) @db.UnsignedInt
-  label        String           @db.VarChar(100)
-  description  String?          @db.Text
-  status       breakdown_status @default(OPEN)
-  idUser       Int?             @map("idUser") @db.UnsignedInt
-  idEquipment  Int?             @map("idEquipment") @db.UnsignedInt
-  resolvedAt   DateTime?        @db.DateTime(3)
-  createdAt    DateTime         @default(now()) @db.DateTime(3)
-  updatedAt    DateTime         @updatedAt @db.DateTime(3)
-
-  reporter  user?     @relation(fields: [idUser], references: [idUser], onDelete: SetNull, onUpdate: Restrict, map: "FK_Breakdown_User")
-  equipment equipment? @relation(fields: [idEquipment], references: [idEquipment], onDelete: SetNull, onUpdate: Restrict, map: "FK_Breakdown_Equipment")
-
-  @@index([idUser], map: "FK_Breakdown_User")
-  @@index([idEquipment], map: "FK_Breakdown_Equipment")
-  @@index([status], map: "IDX_Breakdown_Status")
-  @@map("breakdown")
-}
-
-model request {
-  idRequest   Int      @id @default(autoincrement()) @db.UnsignedInt
-  description String?  @db.Text
-  creationDate DateTime @default(now()) @db.DateTime(3)
-  idUser      Int      @map("idUser") @db.UnsignedInt
-  createdAt   DateTime @default(now()) @db.DateTime(3)
-  updatedAt   DateTime @updatedAt @db.DateTime(3)
-
-  author      user              @relation(fields: [idUser], references: [idUser], onDelete: Cascade, onUpdate: Restrict, map: "FK_Request_User")
-  assignments logisticservice[]
-  submissions submission[]
-
-  @@index([idUser], map: "FK_Request_User")
-  @@index([creationDate], map: "IDX_Request_CreationDate")
-  @@map("request")
-}
-
-model logisticservice {
-  idLogisticService Int      @id @default(autoincrement()) @db.UnsignedInt
-  idRequest         Int      @map("idRequest") @db.UnsignedInt
-  idLogistician     Int      @map("idLogistician") @db.UnsignedInt
-  createdAt         DateTime @default(now()) @db.DateTime(3)
-
-  request     request @relation(fields: [idRequest], references: [idRequest], onDelete: Cascade, onUpdate: Restrict, map: "FK_Assignment_Request")
-  logistician user    @relation(fields: [idLogistician], references: [idUser], onDelete: Cascade, onUpdate: Restrict, map: "FK_Assignment_Logistician")
-
-  @@unique([idRequest, idLogistician], map: "UQ_Assignment_Request_Logistician")
-  @@index([idRequest], map: "FK_Assignment_Request")
-  @@index([idLogistician], map: "FK_Assignment_Logistician")
-  @@map("logisticservice")
-}
-
-model submission {
-  idUser    Int      @map("idUser") @db.UnsignedInt
-  idRequest Int      @map("idRequest") @db.UnsignedInt
-  createdAt DateTime @default(now()) @db.DateTime(3)
-
-  request request @relation(fields: [idRequest], references: [idRequest], onDelete: Cascade, onUpdate: Restrict, map: "FK_Submission_Request")
-  user    user    @relation(fields: [idUser], references: [idUser], onDelete: Cascade, onUpdate: Restrict, map: "FK_Submission_User")
-
-  @@id([idUser, idRequest])
-  @@index([idRequest], map: "FK_Submission_Request")
-  @@map("submission")
 }

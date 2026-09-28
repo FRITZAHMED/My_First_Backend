@@ -1,24 +1,21 @@
 import compression from 'compression';
 import cors from 'cors';
 import express from 'express';
-import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import hpp from 'hpp';
-import pinoHttp from 'pino-http';
+import { pinoHttp } from 'pino-http';
 import swaggerUi from 'swagger-ui-express';
 import { connectDB, disconnectDB } from './Config/Database.js';
 import { env } from './Config/env.js';
 import { logger } from './Config/logger.js';
 import swaggerSpec from './Docs/swagger.js';
 import errorHandler, { notFoundHandler } from './Middleware/error.middleware.js';
-import apiLimiter from './Middleware/rateLimit.middleware.js';
+import { apiLimiter } from './Middleware/rateLimit.middleware.js';
 import routes from './routes/index.js';
 
 export function createApp() {
 	const app = express();
 
-	// Derriere un reverse proxy (nginx, Heroku, Railway...), req.ip doit venir
-	// de X-Forwarded-For sinon le rate limit compte tous les clients comme un seul.
 	app.set('trust proxy', 1);
 	app.disable('x-powered-by');
 

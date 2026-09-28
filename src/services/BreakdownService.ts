@@ -47,7 +47,7 @@ class BreakdownService {
 	}
 
 	async updateBreakdown(idBreakdown: number, data: UpdateBreakdownInput) {
-		const breakdown = await this.getBreakdownById(idBreakdown);
+		await this.getBreakdownById(idBreakdown);
 
 		if (data.idEquipment) {
 			await this.assertEquipmentExists(data.idEquipment);

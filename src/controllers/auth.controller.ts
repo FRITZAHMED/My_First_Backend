@@ -1,4 +1,4 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import AuthService from '../services/AuthService.js';
 import { asyncHandler } from '../Utils/asyncHandler.js';
 import { ForbiddenError } from '../Utils/AppError.js';

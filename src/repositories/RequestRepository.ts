@@ -5,6 +5,7 @@ const publicFields = {
 	idRequest: true,
 	description: true,
 	creationDate: true,
+	idUser: true,
 	createdAt: true,
 	updatedAt: true,
 } as const;

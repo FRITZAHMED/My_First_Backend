@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import type { ErrorRequestHandler, Request } from 'express';
+import type { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { env } from '../Config/env.js';
 import { logger } from '../Config/logger.js';
 import { AppError } from '../Utils/AppError.js';
@@ -54,10 +54,8 @@ function normalise(error: unknown): NormalisedError {
 	};
 }
 
-export const notFoundHandler = (req: Request) => {
-	const error = new AppError(`Route introuvable : ${req.method} ${req.originalUrl}`, 404, 'ROUTE_NOT_FOUND');
-	error.statusCode = 404;
-	throw error;
+export const notFoundHandler = (req: Request, _res: Response, next: NextFunction): void => {
+	next(new AppError(`Route introuvable : ${req.method} ${req.originalUrl}`, 404, 'ROUTE_NOT_FOUND'));
 };
 
 const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {

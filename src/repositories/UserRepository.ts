@@ -1,3 +1,4 @@
+import type { Prisma, user_role } from '@prisma/client';
 import { prisma } from '../Config/Database.js';
 
 /**
@@ -14,12 +15,36 @@ const publicFields = {
 } as const;
 
 export interface UserFilters {
-	role?: import('@prisma/client').user_role;
+	role?: user_role;
 	search?: string;
 }
 
+export interface UserCreateData {
+	professionalEmail: string;
+	password: string;
+	role: user_role;
+}
+
+export interface UserUpdateData {
+	professionalEmail?: string;
+	password?: string;
+	role?: user_role;
+	isActive?: boolean;
+}
+
+function buildWhere(filters: UserFilters): Prisma.userWhereInput {
+	const where: Prisma.userWhereInput = {};
+
+	if (filters.role) where.role = filters.role;
+	if (filters.search) {
+		where.professionalEmail = { contains: filters.search.toLowerCase() };
+	}
+
+	return where;
+}
+
 class UserRepository {
-	create(data: { professionalEmail: string; password: string; role: import('@prisma/client').user_role }) {
+	create(data: UserCreateData) {
 		return prisma.user.create({ data, select: publicFields });
 	}
 
@@ -42,15 +67,8 @@ class UserRepository {
 	}
 
 	findMany(skip: number, take: number, filters: UserFilters = {}) {
-		const where: import('@prisma/client').Prisma.userWhereInput = {};
-
-		if (filters.role) where.role = filters.role;
-		if (filters.search) {
-			where.professionalEmail = { contains: filters.search.toLowerCase() };
-		}
-
 		return prisma.user.findMany({
-			where,
+			where: buildWhere(filters),
 			select: publicFields,
 			orderBy: { idUser: 'asc' },
 			skip,
@@ -59,17 +77,10 @@ class UserRepository {
 	}
 
 	count(filters: UserFilters = {}) {
-		const where: import('@prisma/client').Prisma.userWhereInput = {};
-
-		if (filters.role) where.role = filters.role;
-		if (filters.search) {
-			where.professionalEmail = { contains: filters.search.toLowerCase() };
-		}
-
-		return prisma.user.count({ where });
+		return prisma.user.count({ where: buildWhere(filters) });
 	}
 
-	update(idUser: number, data: { professionalEmail?: string; password?: string; role?: import('@prisma/client').user_role; isActive?: boolean }) {
+	update(idUser: number, data: UserUpdateData) {
 		return prisma.user.update({ where: { idUser }, data, select: publicFields });
 	}
 
