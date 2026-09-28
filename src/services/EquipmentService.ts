@@ -1,5 +1,9 @@
 import { NotFoundError } from '../Utils/AppError.js';
-import type { CreateEquipmentInput, ListEquipmentQuery, UpdateEquipmentInput } from '../Validators/equipment.validator.js';
+import type {
+	CreateEquipmentInput,
+	ListEquipmentQuery,
+	UpdateEquipmentInput,
+} from '../Validators/equipment.validator.js';
 import { buildMeta, toSkipTake } from '../Utils/pagination.js';
 import EquipmentRepository from '../repositories/EquipmentRepository.js';
 import UserRepository from '../repositories/UserRepository.js';

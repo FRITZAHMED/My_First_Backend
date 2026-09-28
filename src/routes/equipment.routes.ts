@@ -36,10 +36,23 @@ router.get('/', authenticate, validate(listEquipmentSchema), EquipmentController
  *     responses:
  *       201: { description: Equipement cree }
  */
-router.post('/', authenticate, requireRole(...MANAGER), validate(createEquipmentSchema), EquipmentController.create);
+router.post(
+	'/',
+	authenticate,
+	requireRole(...MANAGER),
+	validate(createEquipmentSchema),
+	EquipmentController.create,
+);
 
 router.get('/:id', authenticate, validate(idParams), EquipmentController.getById);
-router.patch('/:id', authenticate, requireRole(...MANAGER), validate(idParams), validate(updateEquipmentSchema), EquipmentController.update);
+router.patch(
+	'/:id',
+	authenticate,
+	requireRole(...MANAGER),
+	validate(idParams),
+	validate(updateEquipmentSchema),
+	EquipmentController.update,
+);
 router.delete('/:id', authenticate, requireRole(...MANAGER), validate(idParams), EquipmentController.delete);
 
 export default router;

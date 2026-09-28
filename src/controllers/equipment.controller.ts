@@ -1,7 +1,11 @@
 import type { Request, Response } from 'express';
 import EquipmentService from '../services/EquipmentService.js';
 import { asyncHandler } from '../Utils/asyncHandler.js';
-import type { CreateEquipmentInput, ListEquipmentQuery, UpdateEquipmentInput } from '../Validators/equipment.validator.js';
+import type {
+	CreateEquipmentInput,
+	ListEquipmentQuery,
+	UpdateEquipmentInput,
+} from '../Validators/equipment.validator.js';
 
 class EquipmentController {
 	create = asyncHandler(async (req: Request, res: Response) => {
@@ -10,7 +14,9 @@ class EquipmentController {
 	});
 
 	getAll = asyncHandler(async (req: Request, res: Response) => {
-		const { equipment, meta } = await EquipmentService.listEquipment(req.query as unknown as ListEquipmentQuery);
+		const { equipment, meta } = await EquipmentService.listEquipment(
+			req.query as unknown as ListEquipmentQuery,
+		);
 		res.status(200).json({ success: true, data: equipment, meta });
 	});
 

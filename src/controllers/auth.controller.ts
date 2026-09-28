@@ -5,7 +5,6 @@ import { ForbiddenError } from '../Utils/AppError.js';
 
 class AuthController {
 	register = asyncHandler(async (req: Request, res: Response) => {
-		
 		const actorRole = req.auth?.role;
 
 		if (actorRole && !['Administrator', 'Director'].includes(actorRole)) {

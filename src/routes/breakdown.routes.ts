@@ -3,7 +3,11 @@ import { authenticate, requireRole } from '../Middleware/auth.middleware.js';
 import validate from '../Middleware/validate.middleware.js';
 import BreakdownController from '../controllers/breakdown.controller.js';
 import { idParams } from '../Validators/common.js';
-import {createBreakdownSchema,listBreakdownSchema,updateBreakdownSchema} from '../Validators/breakdown.validator.js';
+import {
+	createBreakdownSchema,
+	listBreakdownSchema,
+	updateBreakdownSchema,
+} from '../Validators/breakdown.validator.js';
 
 const router = Router();
 const LOGISTIC = ['Administrator', 'Director', 'Manager', 'Logistician'] as const;
@@ -31,7 +35,14 @@ router.get('/', authenticate, validate(listBreakdownSchema), BreakdownController
 router.post('/', authenticate, validate(createBreakdownSchema), BreakdownController.create);
 
 router.get('/:id', authenticate, validate(idParams), BreakdownController.getById);
-router.patch('/:id', authenticate, requireRole(...LOGISTIC), validate(idParams), validate(updateBreakdownSchema), BreakdownController.update);
+router.patch(
+	'/:id',
+	authenticate,
+	requireRole(...LOGISTIC),
+	validate(idParams),
+	validate(updateBreakdownSchema),
+	BreakdownController.update,
+);
 router.delete('/:id', authenticate, requireRole(...MANAGER), validate(idParams), BreakdownController.delete);
 
 export default router;

@@ -17,7 +17,9 @@ class BreakdownController {
 	});
 
 	getAll = asyncHandler(async (req: Request, res: Response) => {
-		const { breakdowns, meta } = await BreakdownService.listBreakdowns(req.query as unknown as ListBreakdownQuery);
+		const { breakdowns, meta } = await BreakdownService.listBreakdowns(
+			req.query as unknown as ListBreakdownQuery,
+		);
 		res.status(200).json({ success: true, data: breakdowns, meta });
 	});
 

@@ -23,7 +23,9 @@ await prisma.$executeRawUnsafe(
 
 const applied = new Set(
 	(
-		await prisma.$queryRawUnsafe('SELECT migration_name FROM `_prisma_migrations` WHERE finished_at IS NOT NULL')
+		await prisma.$queryRawUnsafe(
+			'SELECT migration_name FROM `_prisma_migrations` WHERE finished_at IS NOT NULL',
+		)
 	).map((row) => row.migration_name),
 );
 

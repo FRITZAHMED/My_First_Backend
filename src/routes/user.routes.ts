@@ -44,7 +44,14 @@ router.post('/', authenticate, requireRole(...ADMIN), validate(createUserSchema)
  *       404: { description: Introuvable }
  */
 router.get('/:id', authenticate, validate(idParams), UserController.getById);
-router.patch('/:id', authenticate, requireRole(...ADMIN), validate(idParams), validate(updateUserSchema), UserController.update);
+router.patch(
+	'/:id',
+	authenticate,
+	requireRole(...ADMIN),
+	validate(idParams),
+	validate(updateUserSchema),
+	UserController.update,
+);
 router.delete('/:id', authenticate, requireRole('Administrator'), validate(idParams), UserController.delete);
 
 export default router;

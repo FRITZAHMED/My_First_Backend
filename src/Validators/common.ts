@@ -16,7 +16,7 @@ const password = z
  * Le middleware `validate` attend un schema decrivant `{ body, query, params }`
  * et remplace chaque partie par sa version typee.
  *
-* Les parties que le schema ne valide pas doivent imperativement etre en
+ * Les parties que le schema ne valide pas doivent imperativement etre en
  * `.passthrough()` : une route peut enchainer deux validations (params puis
  * body). Avec un `z.object({})` strict, la seconde passe effacerait les
  * params deja valides par la premiere.

@@ -9,21 +9,20 @@ export const createUserSchema = envelope({
 	role: roleEnum.default('Employer'),
 });
 
-export const updateUserSchema = z
-	.object({
-		body: z
-			.object({
-				professionalEmail: trimmedEmail.optional(),
-				password: passwordSchema.optional(),
-				role: roleEnum.optional(),
-				isActive: z.boolean().optional(),
-			})
-			.refine((value) => Object.keys(value).length > 0, {
-				message: 'Au moins un champ doit etre fourni',
-			}),
-		query: z.object({}).passthrough().optional(),
-		params: z.object({}).passthrough().optional(),
-	});
+export const updateUserSchema = z.object({
+	body: z
+		.object({
+			professionalEmail: trimmedEmail.optional(),
+			password: passwordSchema.optional(),
+			role: roleEnum.optional(),
+			isActive: z.boolean().optional(),
+		})
+		.refine((value) => Object.keys(value).length > 0, {
+			message: 'Au moins un champ doit etre fourni',
+		}),
+	query: z.object({}).passthrough().optional(),
+	params: z.object({}).passthrough().optional(),
+});
 
 export const listUsersSchema = z.object({
 	body: z.object({}).passthrough().optional(),

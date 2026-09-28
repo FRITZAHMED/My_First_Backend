@@ -3,7 +3,12 @@ import { authenticate } from '../Middleware/auth.middleware.js';
 import { authLimiter } from '../Middleware/rateLimit.middleware.js';
 import validate from '../Middleware/validate.middleware.js';
 import AuthController from '../controllers/auth.controller.js';
-import {changePasswordSchema,loginSchema,refreshSchema,registerSchema} from '../Validators/auth.validator.js';
+import {
+	changePasswordSchema,
+	loginSchema,
+	refreshSchema,
+	registerSchema,
+} from '../Validators/auth.validator.js';
 
 const router = Router();
 

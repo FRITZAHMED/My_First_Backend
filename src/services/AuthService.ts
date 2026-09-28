@@ -41,7 +41,10 @@ class AuthService {
 		const invalid = new UnauthorizedError('Identifiants invalides');
 
 		if (!user) {
-			await comparePassword(input.password, '$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv');
+			await comparePassword(
+				input.password,
+				'$2b$12$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvalidinv',
+			);
 			throw invalid;
 		}
 

@@ -11,7 +11,6 @@ interface NormalisedError {
 	details?: unknown;
 }
 
-
 function normalise(error: unknown): NormalisedError {
 	if (error instanceof AppError) {
 		return { statusCode: error.statusCode, code: error.code, message: error.message, details: error.details };

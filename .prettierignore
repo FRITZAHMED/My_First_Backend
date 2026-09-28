@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.venv/
+.kilo/
+.env
+.env.local
+*.log

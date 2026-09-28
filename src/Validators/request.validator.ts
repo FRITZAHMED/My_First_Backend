@@ -5,16 +5,15 @@ export const createRequestSchema = envelope({
 	description: z.string().trim().min(1, 'Description obligatoire').max(2000).optional(),
 });
 
-export const updateRequestSchema = z
-	.object({
-		body: z
-			.object({
-				description: z.string().trim().min(1).max(2000).optional(),
-			})
-			.refine((value) => Object.keys(value).length > 0, { message: 'Au moins un champ doit etre fourni' }),
-		query: z.object({}).passthrough().optional(),
-		params: z.object({}).passthrough().optional(),
-	});
+export const updateRequestSchema = z.object({
+	body: z
+		.object({
+			description: z.string().trim().min(1).max(2000).optional(),
+		})
+		.refine((value) => Object.keys(value).length > 0, { message: 'Au moins un champ doit etre fourni' }),
+	query: z.object({}).passthrough().optional(),
+	params: z.object({}).passthrough().optional(),
+});
 
 export const listRequestSchema = z.object({
 	body: z.object({}).passthrough().optional(),

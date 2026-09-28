@@ -3,7 +3,11 @@ import { authenticate, requireRole } from '../Middleware/auth.middleware.js';
 import validate from '../Middleware/validate.middleware.js';
 import RequestController from '../controllers/request.controller.js';
 import { idRequestParams } from '../Validators/common.js';
-import { createRequestSchema, listRequestSchema, updateRequestSchema } from '../Validators/request.validator.js';
+import {
+	createRequestSchema,
+	listRequestSchema,
+	updateRequestSchema,
+} from '../Validators/request.validator.js';
 
 const router = Router();
 const MANAGER = ['Administrator', 'Director', 'Manager'] as const;
@@ -30,7 +34,19 @@ router.get('/', authenticate, validate(listRequestSchema), RequestController.get
 router.post('/', authenticate, validate(createRequestSchema), RequestController.create);
 
 router.get('/:idRequest', authenticate, validate(idRequestParams), RequestController.getById);
-router.patch('/:idRequest', authenticate, validate(idRequestParams), validate(updateRequestSchema), RequestController.update);
-router.delete('/:idRequest', authenticate, requireRole(...MANAGER), validate(idRequestParams), RequestController.delete);
+router.patch(
+	'/:idRequest',
+	authenticate,
+	validate(idRequestParams),
+	validate(updateRequestSchema),
+	RequestController.update,
+);
+router.delete(
+	'/:idRequest',
+	authenticate,
+	requireRole(...MANAGER),
+	validate(idRequestParams),
+	RequestController.delete,
+);
 
 export default router;
