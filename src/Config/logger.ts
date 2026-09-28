@@ -2,18 +2,21 @@ import pino from 'pino';
 import { env } from './env.js';
 
 export const logger = pino({
-  level: env.NODE_ENV === 'production' ? 'info' : 'debug',
-  redact: {
-    paths: [
-      'req.headers.authorization',
-      'req.body.password',
-      'req.body.refreshToken',
-      '*.password',
-    ],
-    censor: '[REDACTED]',
-  },
-  transport:
-    env.NODE_ENV === 'development'
-      ? { target: 'pino-pretty', options: { colorize: true } }
-      : undefined,
+	level: env.isProduction ? 'info' : 'debug',
+	base: undefined,
+	redact: {
+		paths: [
+			'req.headers.authorization',
+			'req.headers.cookie',
+			'req.body.password',
+			'req.body.refreshToken',
+			'res.headers["set-cookie"]',
+			'*.password',
+			'*.refreshToken',
+		],
+		censor: '[REDACTED]',
+	},
+	transport: env.isProduction
+		? undefined
+		: { target: 'pino-pretty', options: { colorize: true, translateTime: 'HH:MM:ss' } },
 });

@@ -1,32 +1,45 @@
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../Config/Database.js';
 
-export type RequestCreateInput = {
-	description?: string | null;
-	creationDate?: Date | null;
-};
-
-export type RequestUpdateInput = Partial<RequestCreateInput>;
+const publicFields = {
+	idRequest: true,
+	description: true,
+	creationDate: true,
+	createdAt: true,
+	updatedAt: true,
+} as const;
 
 class RequestRepository {
-	async create(requestData: RequestCreateInput) {
-		return prisma.request.create({ data: requestData });
+	create(data: Prisma.requestUncheckedCreateInput) {
+		return prisma.request.create({ data, select: publicFields });
 	}
 
-	async findById(idRequest: number) {
-		return prisma.request.findUnique({ where: { idRequest } });
+	findById(idRequest: number) {
+		return prisma.request.findUnique({ where: { idRequest }, select: publicFields });
 	}
 
-	async findAll() {
-		return prisma.request.findMany({ orderBy: { idRequest: 'asc' } });
+	findManyByAuthor(idUser: number, skip: number, take: number) {
+		return prisma.request.findMany({
+			where: { idUser },
+			select: publicFields,
+			orderBy: { creationDate: 'desc' },
+			skip,
+			take,
+		});
 	}
 
-	async update(idRequest: number, requestData: RequestUpdateInput) {
-		return prisma.request.update({ where: { idRequest }, data: requestData });
+	countByAuthor(idUser: number) {
+		return prisma.request.count({ where: { idUser } });
 	}
 
-	async delete(idRequest: number) {
-		return prisma.request.delete({ where: { idRequest } });
+	update(idRequest: number, data: Prisma.requestUpdateInput) {
+		return prisma.request.update({ where: { idRequest }, data, select: publicFields });
+	}
+
+	delete(idRequest: number) {
+		return prisma.request.delete({ where: { idRequest }, select: publicFields });
 	}
 }
 
 export default new RequestRepository();
+export { publicFields as requestPublicFields };

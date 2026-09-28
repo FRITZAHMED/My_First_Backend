@@ -1,37 +1,43 @@
 import type { NextFunction, Request, Response } from 'express';
 import { z } from 'zod';
+import { ZodError } from 'zod';
+import { ValidationError } from '../Utils/AppError.js';
 
-type ValidatedRequestParts = {
-	body: unknown;
-	query: unknown;
-	params: unknown;
+type RequestParts = {
+	body?: unknown;
+	query?: unknown;
+	params?: unknown;
 };
 
-const validate = (schema: z.ZodTypeAny) => async (req: Request, res: Response, next: NextFunction) => {
-	try {
-		const parsed = await schema.parseAsync({
-			body: req.body,
-			query: req.query,
-			params: req.params,
-		}) as ValidatedRequestParts;
+function toFieldErrors(error: ZodError): Array<{ field: string; message: string }> {
+	return error.issues.map((issue) => ({
+		field: issue.path.join('.') || '(racine)',
+		message: issue.message,
+	}));
+}
 
-		if (parsed.body) req.body = parsed.body;
-		if (parsed.params) req.params = parsed.params as typeof req.params;
-		if (parsed.query) req.query = parsed.query as typeof req.query;
-		return next();
-	} catch (error: unknown) {
-		if (error instanceof z.ZodError) {
-			return res.status(400).json({
-				success: false,
-				message: 'Erreur de validation des données',
-				errors: error.issues.map((issue) => ({
-					field: issue.path.join('.'),
-					message: issue.message,
-				})),
-			});
+const validate =
+	(schema: z.ZodTypeAny) =>
+	(req: Request, _res: Response, next: NextFunction): void => {
+		try {
+			const parsed = schema.parse({
+				body: req.body,
+				query: req.query,
+				params: req.params,
+			}) as RequestParts;
+
+			if (parsed.body !== undefined) req.body = parsed.body;
+			if (parsed.query !== undefined) req.query = parsed.query as Request['query'];
+			if (parsed.params !== undefined) req.params = parsed.params as Request['params'];
+
+			next();
+		} catch (error) {
+			if (error instanceof ZodError) {
+				next(new ValidationError('Erreur de validation des donnees', toFieldErrors(error)));
+				return;
+			}
+			next(error);
 		}
-		return next(error);
-	}
-};
+	};
 
 export default validate;

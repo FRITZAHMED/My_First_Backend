@@ -1,53 +1,49 @@
-import { PrismaClient } from "@prisma/client";
-import { CreateBreakdownInput } from "../Validators/breakdownValidator.js";
+import type { breakdown_status, Prisma } from '@prisma/client';
+import { prisma } from '../Config/Database.js';
 
-export type BreakdownCreateInput = {
-    label: string;
-    Description: string;
-};
-
-export type BreakdownUpdateInput = Partial<BreakdownCreateInput>;
+const publicFields = {
+	idBreakdown: true,
+	label: true,
+	description: true,
+	status: true,
+	idUser: true,
+	idEquipment: true,
+	resolvedAt: true,
+	createdAt: true,
+	updatedAt: true,
+} as const;
 
 class BreakdownRepository {
-    private prisma = new PrismaClient();
+	create(data: Prisma.breakdownUncheckedCreateInput) {
+		return prisma.breakdown.create({ data, select: publicFields });
+	}
 
-    async create(BreakdownData: BreakdownCreateInput) {
-        return this.prisma.breakdown.create({ data: BreakdownData });
-    }
+	findById(idBreakdown: number) {
+		return prisma.breakdown.findUnique({ where: { idBreakdown }, select: publicFields });
+	}
 
-    async findById(idBreakdown:number){
-        return this.prisma.breakdown.findUnique({
-            where:{
-                idBreakdown: Number(idBreakdown)
-            }
-        });
-    }
+	findMany(skip: number, take: number, filters: { status?: breakdown_status } = {}) {
+		return prisma.breakdown.findMany({
+			where: filters.status ? { status: filters.status } : undefined,
+			select: publicFields,
+			orderBy: { idBreakdown: 'desc' },
+			skip,
+			take,
+		});
+	}
 
-    async findAll(){
-        return this.prisma.breakdown.findMany({
-            orderBy:{
-                idBreakdown:'asc'
-            }
-        });
-    }
+	count(filters: { status?: breakdown_status } = {}) {
+		return prisma.breakdown.count({ where: filters.status ? { status: filters.status } : undefined });
+	}
 
-    async Update(idBreakdown: number,BreakdownData:CreateBreakdownInput){
-        return this.prisma.breakdown.update({
-            where: {
-                idBreakdown: Number(idBreakdown)
-            },
-            data:BreakdownData
-        });
-    }
+	update(idBreakdown: number, data: Prisma.breakdownUncheckedUpdateInput) {
+		return prisma.breakdown.update({ where: { idBreakdown }, data, select: publicFields });
+	}
 
-    async Delete(idBreakdown: Number){
-        return this.prisma.breakdown.delete({
-            where:{
-                idBreakdown: Number(idBreakdown)
-            }
-        });
-
-    }
+	delete(idBreakdown: number) {
+		return prisma.breakdown.delete({ where: { idBreakdown }, select: publicFields });
+	}
 }
 
 export default new BreakdownRepository();
+export { publicFields as breakdownPublicFields };

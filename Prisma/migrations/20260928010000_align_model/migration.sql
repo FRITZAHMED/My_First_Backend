@@ -115,8 +115,6 @@ ALTER TABLE `submission` ADD CONSTRAINT `FK_Submission_Request` FOREIGN KEY (`id
 -- AddForeignKey
 ALTER TABLE `submission` ADD CONSTRAINT `FK_Submission_User` FOREIGN KEY (`idUser`) REFERENCES `user`(`idUser`) ON DELETE CASCADE ON UPDATE RESTRICT;
 
--- Les index sont supprimes avant les cles etrangeres qui les supportent
--- MariaDB ne supporte pas "ALTER TABLE ... RENAME INDEX" : on recree les index renommes
-DROP INDEX `FK_ServiceLog_Demande` ON `logisticservice`;
-
-DROP INDEX `FK_Soumettre_Demande` ON `submission`;
+-- MariaDB ne supporte pas "ALTER TABLE ... RENAME INDEX" : les anciens index
+-- FK_ServiceLog_Demande / FK_Soumettre_Demande sont simplement reutilises par les
+-- nouvelles contraintes renommees, il n'y a donc rien a supprimer ici.

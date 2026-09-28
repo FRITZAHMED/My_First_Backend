@@ -1,52 +1,47 @@
+import type { equipment_status, Prisma } from '@prisma/client';
 import { prisma } from '../Config/Database.js';
 
-export type EquipmentCreateInput = {
-    description: string;
-    serialNumber: string;
-};
-
-export type EquipmentUpdateInput = Partial<EquipmentCreateInput>;
+const publicFields = {
+	idEquipment: true,
+	description: true,
+	serialNumber: true,
+	status: true,
+	idUser: true,
+	createdAt: true,
+	updatedAt: true,
+} as const;
 
 class EquipmentRepository {
+	create(data: Prisma.equipmentUncheckedCreateInput) {
+		return prisma.equipment.create({ data, select: publicFields });
+	}
 
-    async create(equipmentData: EquipmentCreateInput) {
-        return prisma.equipment.create({
-            data: equipmentData
-        });
-    }
+	findById(idEquipment: number) {
+		return prisma.equipment.findUnique({ where: { idEquipment }, select: publicFields });
+	}
 
-    async findById(idEquipment: number) {
-        return prisma.equipment.findUnique({
-            where: {
-                idEquipment: Number(idEquipment)
-            }
-        });
-    }
+	findMany(skip: number, take: number, filters: { status?: equipment_status } = {}) {
+		return prisma.equipment.findMany({
+			where: filters.status ? { status: filters.status } : undefined,
+			select: publicFields,
+			orderBy: { idEquipment: 'asc' },
+			skip,
+			take,
+		});
+	}
 
-    async findAll() {
-        return prisma.equipment.findMany({
-            orderBy: {
-                idEquipment: 'asc'
-            }
-        });
-    }
+	count(filters: { status?: equipment_status } = {}) {
+		return prisma.equipment.count({ where: filters.status ? { status: filters.status } : undefined });
+	}
 
-    async update(idEquipment: number, equipmentData: EquipmentUpdateInput) {
-        return prisma.equipment.update({
-            where: {
-                idEquipment: Number(idEquipment)
-            },
-            data: equipmentData
-        });
-    }
+	update(idEquipment: number, data: Prisma.equipmentUncheckedUpdateInput) {
+		return prisma.equipment.update({ where: { idEquipment }, data, select: publicFields });
+	}
 
-    async delete(idEquipment: number) {
-        return prisma.equipment.delete({
-            where: {
-                idEquipment: Number(idEquipment)
-            }
-        });
-    }
+	delete(idEquipment: number) {
+		return prisma.equipment.delete({ where: { idEquipment }, select: publicFields });
+	}
 }
 
 export default new EquipmentRepository();
+export { publicFields as equipmentPublicFields };

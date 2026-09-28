@@ -1,33 +1,46 @@
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../Config/Database.js';
 
-export type LogisticServiceCreateInput = {
-	idRequest: number;
-	professionalEmail: string;
-	password: string;
-};
-
-export type LogisticServiceUpdateInput = Partial<LogisticServiceCreateInput>;
+const publicFields = {
+	idLogisticService: true,
+	idRequest: true,
+	idLogistician: true,
+	createdAt: true,
+} as const;
 
 class LogisticServiceRepository {
-	async create(serviceData: LogisticServiceCreateInput) {
-		return prisma.logisticservice.create({ data: serviceData });
+	create(data: Prisma.logisticserviceUncheckedCreateInput) {
+		return prisma.logisticservice.create({ data, select: publicFields });
 	}
 
-	async findById(idLogisticService: number) {
-		return prisma.logisticservice.findUnique({ where: { idLogisticService } });
+	findById(idLogisticService: number) {
+		return prisma.logisticservice.findUnique({ where: { idLogisticService }, select: publicFields });
 	}
 
-	async findAll() {
-		return prisma.logisticservice.findMany({ orderBy: { idLogisticService: 'asc' } });
+	findByPair(idRequest: number, idLogistician: number) {
+		return prisma.logisticservice.findUnique({
+			where: { idRequest_idLogistician: { idRequest, idLogistician } },
+			select: publicFields,
+		});
 	}
 
-	async update(idLogisticService: number, serviceData: LogisticServiceUpdateInput) {
-		return prisma.logisticservice.update({ where: { idLogisticService }, data: serviceData });
+	findMany(skip: number, take: number) {
+		return prisma.logisticservice.findMany({
+			select: publicFields,
+			orderBy: { idLogisticService: 'asc' },
+			skip,
+			take,
+		});
 	}
 
-	async delete(idLogisticService: number) {
-		return prisma.logisticservice.delete({ where: { idLogisticService } });
+	count() {
+		return prisma.logisticservice.count();
+	}
+
+	delete(idLogisticService: number) {
+		return prisma.logisticservice.delete({ where: { idLogisticService }, select: publicFields });
 	}
 }
 
 export default new LogisticServiceRepository();
+export { publicFields as assignmentPublicFields };

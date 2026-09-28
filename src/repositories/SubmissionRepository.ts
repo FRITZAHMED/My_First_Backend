@@ -1,32 +1,52 @@
 import { prisma } from '../Config/Database.js';
 
-export type SubmissionCreateInput = {
-	idUser: number;
-	idRequest: number;
-};
+const publicFields = {
+	idUser: true,
+	idRequest: true,
+	createdAt: true,
+} as const;
 
 class SubmissionRepository {
-	async create(submissionData: SubmissionCreateInput) {
-		return prisma.submission.create({ data: submissionData });
+	create(data: { idUser: number; idRequest: number }) {
+		return prisma.submission.create({ data, select: publicFields });
 	}
 
-	async findById(idUser: number, idRequest: number) {
+	findById(idUser: number, idRequest: number) {
 		return prisma.submission.findUnique({
 			where: { idUser_idRequest: { idUser, idRequest } },
+			select: publicFields,
 		});
 	}
 
-	async findAll() {
+	findMany(skip: number, take: number, filters: { idRequest?: number; idUser?: number } = {}) {
 		return prisma.submission.findMany({
+			where: {
+				...(filters.idRequest !== undefined && { idRequest: filters.idRequest }),
+				...(filters.idUser !== undefined && { idUser: filters.idUser }),
+			},
+			select: publicFields,
 			orderBy: [{ idRequest: 'asc' }, { idUser: 'asc' }],
+			skip,
+			take,
 		});
 	}
 
-	async delete(idUser: number, idRequest: number) {
+	count(filters: { idRequest?: number; idUser?: number } = {}) {
+		return prisma.submission.count({
+			where: {
+				...(filters.idRequest !== undefined && { idRequest: filters.idRequest }),
+				...(filters.idUser !== undefined && { idUser: filters.idUser }),
+			},
+		});
+	}
+
+	delete(idUser: number, idRequest: number) {
 		return prisma.submission.delete({
 			where: { idUser_idRequest: { idUser, idRequest } },
+			select: publicFields,
 		});
 	}
 }
 
 export default new SubmissionRepository();
+export { publicFields as submissionPublicFields };
