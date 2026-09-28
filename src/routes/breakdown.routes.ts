@@ -3,11 +3,7 @@ import { authenticate, requireRole } from '../Middleware/auth.middleware.js';
 import validate from '../Middleware/validate.middleware.js';
 import BreakdownController from '../controllers/breakdown.controller.js';
 import { idParams } from '../Validators/common.js';
-import {
-	createBreakdownSchema,
-	listBreakdownSchema,
-	updateBreakdownSchema,
-} from '../Validators/breakdown.validator.js';
+import {createBreakdownSchema,listBreakdownSchema,updateBreakdownSchema} from '../Validators/breakdown.validator.js';
 
 const router = Router();
 const LOGISTIC = ['Administrator', 'Director', 'Manager', 'Logistician'] as const;
