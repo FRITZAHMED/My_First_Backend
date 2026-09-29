@@ -5,6 +5,7 @@ const publicFields = {
 	idBreakdown: true,
 	label: true,
 	description: true,
+	severity: true,
 	status: true,
 	idUser: true,
 	idEquipment: true,

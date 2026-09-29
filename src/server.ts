@@ -11,7 +11,8 @@ import { logger } from './Config/logger.js';
 import swaggerSpec from './Docs/swagger.js';
 import errorHandler, { notFoundHandler } from './Middleware/error.middleware.js';
 import { apiLimiter } from './Middleware/rateLimit.middleware.js';
-import routes from './routes/index.js';
+import route from './routes/index.js'
+
 
 export function createApp() {
 	const app = express();
@@ -49,7 +50,7 @@ export function createApp() {
 	});
 
 	app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-	app.use('/api', routes);
+	app.use('/api', route);
 
 	app.use(notFoundHandler);
 	app.use(errorHandler);

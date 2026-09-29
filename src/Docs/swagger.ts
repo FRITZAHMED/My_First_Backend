@@ -11,6 +11,17 @@ const options = {
 				'Rhopen By Ahmed',
 		},
 		servers: [{ url: `http://localhost:${env.PORT}`, description: 'Developpement' }],
+		tags: [
+			{ name: 'Auth'},
+			{ name: 'Users'},
+			{ name: 'Equipment'},
+			{ name: 'Breakdowns'},
+			{ name: 'Requests'},
+			{ name: 'LogisticService'},
+			{ name: 'Submissions'},
+			{ name: 'License'},
+			{ name: 'Health'},
+		],
 		components: {
 			securitySchemes: {
 				bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
@@ -66,6 +77,7 @@ const options = {
 						idBreakdown: { type: 'integer' },
 						label: { type: 'string' },
 						description: { type: 'string' },
+						severity: { type: 'string', enum: ['Low', 'Medium', 'High', 'Critical'] },
 						status: { type: 'string', enum: ['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED'] },
 						idEquipment: { type: 'integer', nullable: true },
 						resolvedAt: { type: 'string', format: 'date-time', nullable: true },
@@ -94,6 +106,17 @@ const options = {
 						idRequest: { type: 'integer' },
 					},
 				},
+				License: {
+					type: 'object',
+					properties: {
+						idLicense : { type: 'integer' },
+						licenseNumber: { type: 'integer' },
+						status: {
+							type: 'string',
+							enum: ['ACTIVE', 'EXPIRED', 'SUSPENDED'],
+						},
+					},
+				},
 			},
 		},
 		security: [{ bearerAuth: [] }],
@@ -104,3 +127,4 @@ const options = {
 const swaggerSpec = swaggerJSDoc(options) as Record<string, unknown>;
 
 export default swaggerSpec;
+  

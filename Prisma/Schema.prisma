@@ -26,15 +26,16 @@ model user {
 }
 
 model equipment {
-  idEquipment  Int              @id @default(autoincrement()) @db.UnsignedInt
-  description  String?          @db.VarChar(255)
-  serialNumber String?          @unique(map: "serialNumber") @db.VarChar(100)
-  createdAt    DateTime         @default(now())
-  idUser       Int?             @map("idUser") @db.UnsignedInt
-  status       equipment_status @default(AVAILABLE)
-  updatedAt    DateTime         @updatedAt
-  breakdowns   breakdown[]
-  holder       user?            @relation(fields: [idUser], references: [idUser], onUpdate: Restrict, map: "FK_Equipment_User")
+  idEquipment   Int              @id @default(autoincrement()) @db.UnsignedInt
+  description   String?          @db.VarChar(255)
+  serialNumber  String?          @unique(map: "serialNumber") @db.VarChar(100)
+  createdAt     DateTime         @default(now())
+  idUser        Int?             @map("idUser") @db.UnsignedInt
+  status        equipment_status @default(AVAILABLE)
+  updatedAt     DateTime         @updatedAt
+  breakdowns    breakdown[]
+  licenses      license[]
+  holder        user?            @relation(fields: [idUser], references: [idUser], onUpdate: Restrict, map: "FK_Equipment_User")
 
   @@index([idUser], map: "FK_Equipment_User")
   @@index([status], map: "IDX_Equipment_Status")
@@ -45,16 +46,17 @@ model breakdown {
   idBreakdown Int              @id @default(autoincrement()) @db.UnsignedInt
   label       String           @db.VarChar(100)
   description String?          @db.Text
+  severity    breakdown_severity @default(Medium)
   createdAt   DateTime         @default(now())
   idEquipment Int?             @map("idEquipment") @db.UnsignedInt
-  idUser      Int?             @map("idUser") @db.UnsignedInt
+  idUser      Int?             @map("idEquipment") @db.UnsignedInt
   resolvedAt  DateTime?
   status      breakdown_status @default(OPEN)
   updatedAt   DateTime         @updatedAt
   equipment   equipment?       @relation(fields: [idEquipment], references: [idEquipment], onUpdate: Restrict, map: "FK_Breakdown_Equipment")
-  reporter    user?            @relation(fields: [idUser], references: [idUser], onUpdate: Restrict, map: "FK_Breakdown_User")
+  reporter    user?            @relation(fields: [idEquipment], references: [idEquipment], onUpdate: Restrict, map: "FK_Breakdown_User")
 
-  @@index([idUser], map: "FK_Breakdown_User")
+  @@index([idEquipment], map: "FK_Breakdown_User")
   @@index([idEquipment], map: "FK_Breakdown_Equipment")
   @@index([status], map: "IDX_Breakdown_Status")
   @@map("breakdown")
@@ -102,6 +104,20 @@ model submission {
   @@map("submission")
 }
 
+model license {
+  idLicense     Int            @id @default(autoincrement()) @map("idLicense") @db.UnsignedInt
+  licenseNumber String         @unique @map("licenseNumber") @db.VarChar(100)
+  status        license_status @default(ACTIVE) @map("status")
+  idEquipment   Int            @unique @map("idEquipment") @db.UnsignedInt
+  createdAt     DateTime       @default(now()) @map("createdAt")
+  updatedAt     DateTime       @updatedAt @map("updatedAt")
+  equipment     equipment      @relation(fields: [idEquipment], references: [idEquipment], onDelete: Cascade, onUpdate: Restrict, map: "FK_License_Equipment")
+
+  @@index([idEquipment], map: "FK_License_Equipment")
+  @@index([status], map: "IDX_License_Status")
+  @@map("license")
+}
+
 model prisma_migrations {
   id             String    @id @db.VarChar(36)
   checksum       String    @db.VarChar(64)
@@ -134,4 +150,17 @@ enum breakdown_status {
   IN_PROGRESS
   RESOLVED
   CLOSED
+}
+
+enum breakdown_severity {
+  Low
+  Medium
+  High
+  Critical
+}
+
+enum license_status {
+  ACTIVE
+  EXPIRED
+  SUSPENDED
 }

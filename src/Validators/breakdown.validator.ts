@@ -2,10 +2,12 @@ import { z } from 'zod';
 import { envelope, pageQuery } from './common.js';
 
 const statusEnum = z.enum(['OPEN', 'IN_PROGRESS', 'RESOLVED', 'CLOSED']);
+const severityEnum = z.enum(['Low', 'Medium', 'High', 'Critical']);
 
 export const createBreakdownSchema = envelope({
 	label: z.string().trim().min(1, 'Libelle obligatoire').max(100),
 	description: z.string().trim().max(2000).nullish(),
+	severity: severityEnum.default('Medium'),
 	idEquipment: z.number().int().positive().nullish(),
 });
 
@@ -15,6 +17,7 @@ export const updateBreakdownSchema = z.object({
 			label: z.string().trim().min(1).max(100).optional(),
 			description: z.string().trim().max(2000).nullish(),
 			status: statusEnum.optional(),
+			severity: severityEnum.optional(),
 			idEquipment: z.number().int().positive().nullish(),
 			resolvedAt: z.coerce.date().nullish(),
 		})

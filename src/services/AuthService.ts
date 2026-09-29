@@ -11,10 +11,15 @@ const SELF_REGISTERED_ROLES: user_role[] = ['Employer', 'Logistician'];
 
 class AuthService {
 	async register(input: RegisterInput, actorRole?: user_role) {
-		const role = actorRole && actorRole !== 'Employer' ? input.role : 'Employer';
+		let role: user_role;
 
-		if (!actorRole && !SELF_REGISTERED_ROLES.includes(role)) {
-			throw new ForbiddenError("L'inscription publique est limitee aux roles Employer et Logistician");
+		if (!actorRole) {
+			role = input.role;
+			if (!SELF_REGISTERED_ROLES.includes(role)) {
+				throw new ForbiddenError("L'inscription publique est limitee aux roles Employer et Logistician");
+			}
+		} else {
+			role = input.role;
 		}
 
 		const existing = await UserRepository.findByEmail(input.professionalEmail);

@@ -7,11 +7,8 @@ const trimmedEmail = z
 	.email('Adresse email invalide')
 	.max(150, 'Adresse email trop longue (150 caracteres maximum)');
 
-const password = z
-	.string()
-	.min(8, 'Le mot de passe doit faire au moins 8 caracteres')
-	.max(72, 'Le mot de passe doit faire au plus 72 caracteres (limite bcrypt)');
-
+const password = z.string()
+	.min(8, 'Le mot de passe doit faire au moins 8 caracteres');
 /**
  * Le middleware `validate` attend un schema decrivant `{ body, query, params }`
  * et remplace chaque partie par sa version typee.
@@ -53,13 +50,13 @@ export const idLogisticServiceParams = paramsOnly({
 });
 
 export const idRequestAndUserParams = paramsOnly({
-	idRequest: z.coerce.number().int().positive('Identifiant de demande invalide'),
-	idUser: z.coerce.number().int().positive('Identifiant utilisateur invalide'),
+	idRequest: z.coerce.number(),
+	idUser: z.coerce.number(),
 });
 
 const pageQuery = {
-	page: z.coerce.number().int().min(1).default(1),
-	limit: z.coerce.number().int().min(1).max(100).default(20),
+	page: z.coerce.number(),
+	limit: z.coerce.number(),
 };
 
 export { pageQuery, password as passwordSchema, trimmedEmail };

@@ -19,6 +19,7 @@ class BreakdownService {
 		return BreakdownRepository.create({
 			label: data.label,
 			description: data.description ?? null,
+			severity: data.severity,
 			idEquipment: data.idEquipment ?? null,
 			idUser: reporterId,
 		});
