@@ -49,14 +49,14 @@ model breakdown {
   severity    breakdown_severity @default(Medium)
   createdAt   DateTime         @default(now())
   idEquipment Int?             @map("idEquipment") @db.UnsignedInt
-  idUser      Int?             @map("idEquipment") @db.UnsignedInt
+  idUser      Int?             @map("idUser") @db.UnsignedInt
   resolvedAt  DateTime?
   status      breakdown_status @default(OPEN)
   updatedAt   DateTime         @updatedAt
   equipment   equipment?       @relation(fields: [idEquipment], references: [idEquipment], onUpdate: Restrict, map: "FK_Breakdown_Equipment")
-  reporter    user?            @relation(fields: [idEquipment], references: [idEquipment], onUpdate: Restrict, map: "FK_Breakdown_User")
+  reporter    user?            @relation(fields: [idUser], references: [idUser], onUpdate: Restrict, map: "FK_Breakdown_User")
 
-  @@index([idEquipment], map: "FK_Breakdown_User")
+  @@index([idUser], map: "FK_Breakdown_User")
   @@index([idEquipment], map: "FK_Breakdown_Equipment")
   @@index([status], map: "IDX_Breakdown_Status")
   @@map("breakdown")

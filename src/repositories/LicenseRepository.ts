@@ -1,4 +1,3 @@
-import { ConflictError, NotFoundError } from '../Utils/AppError.js';
 import { prisma } from '../Config/Database.js';
 import type { license_status, Prisma } from '@prisma/client';
 

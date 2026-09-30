@@ -20,7 +20,6 @@ const options = {
 			{ name: 'LogisticService'},
 			{ name: 'Submissions'},
 			{ name: 'License'},
-			{ name: 'Health'},
 		],
 		components: {
 			securitySchemes: {

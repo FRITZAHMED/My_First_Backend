@@ -1,9 +1,6 @@
-import LicenseRepository from '../repositories/LicenseRepository.js';
+import LicenseRepository, {type LicenseCreateInput,type LicenseUpdateInput} from '../repositories/LicenseRepository.js';
 import { NotFoundError, ConflictError } from '../Utils/AppError.js';
-import type { license_status, Prisma } from '@prisma/client';
-
-type LicenseCreateInput = Prisma.licenseCreateInput;
-type LicenseUpdateInput = Prisma.licenseUpdateInput;
+import type { license_status } from '@prisma/client';
 
 class LicenseService {
   async getAll(params: {
@@ -34,14 +31,14 @@ class LicenseService {
   async update(idLicense: number, data: LicenseUpdateInput) {
     await this.getById(idLicense);
 
-    if (data.licenseNumber) {
+    if (typeof data.licenseNumber === 'string' && data.licenseNumber) {
       const existing = await LicenseRepository.findByLicenseNumber(data.licenseNumber);
       if (existing && existing.idLicense !== idLicense) {
         throw new ConflictError('Ce numéro de licence est déjà utilisé');
       }
     }
 
-    if (data.idEquipment) {
+    if (typeof data.idEquipment === 'number') {
       const existing = await LicenseRepository.findByEquipmentId(data.idEquipment);
       if (existing && existing.idLicense !== idLicense) {
         throw new ConflictError('Cet équipement a déjà une licence');

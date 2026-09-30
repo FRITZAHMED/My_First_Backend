@@ -1,11 +1,12 @@
 import type { Request, Response } from 'express';
 import LicenseService from '../services/LicenseService.js';
 import { asyncHandler } from '../Utils/asyncHandler.js';
+import type { ListLicensesInput } from '../Validators/license.validator.js';
 
 class LicenseController {
   getAll = asyncHandler(
     async (req: Request, res: Response) => {
-    const result = await LicenseService.getAll(req.query as any);
+    const result = await LicenseService.getAll(req.query as unknown as ListLicensesInput);
     res.status(200).json({ success: true, ...result });
   });
 
